@@ -1,0 +1,41 @@
+categories:
+  - name: "Direct Path Management"
+    description: "Problems with PATH and LD_LIBRARY_PATH management"
+    patterns:
+      - problem: "export PATH=... or export LD_LIBRARY_PATH=... instead of export PATH=...:$PATH. The user might overwrite system paths."
+        detector: "PATH=|LD_LIBRARY_PATH="
+        exclude_pattern: "\\$PATH|\\$LD_LIBRARY_PATH"
+        ai_recommendation: "You are completely overwriting the PATH variable. This can break basic system commands. You probably wanted to add a new path, not replace all existing ones. Use export PATH=/your/path:$PATH."
+
+  - name: "Module Load in bashrc"
+    description: "Using module load in .bashrc instead of .bash_profile"
+    patterns:
+      - problem: ".bashrc is executed for every new shell, including non-interactive ones. This slows down work and can cause conflicts. Modules are better loaded in .bash_profile or interactively."
+        detector: "module load|source.*modules\\.sh"
+        exclude_pattern: ""
+        ai_recommendation: "We found module load in your .bashrc. This file is executed every time a shell starts, which can slow down connections and cause problems in scripts. We recommend moving these commands to the ~/.bash_profile file, which is executed only once at login."
+
+  - name: "Conda Activation"
+    description: "Conda environment activation in bashrc"
+    patterns:
+      - problem: "conda activate my_env or source .../conda.sh in .bashrc — this is one of the most common causes of conflicts with system libraries and modules."
+        detector: "conda activate|conda init|__conda_setup"
+        exclude_pattern: ""
+        ai_recommendation: "Activating a Conda environment in .bashrc often leads to conflicts with system modules. Libraries from Conda can be replaced by system ones, leading to segmentation faults. We recommend activating the Conda environment manually in the terminal or at the beginning of your job script, after loading the necessary modules."
+
+  - name: "Conflicting Modules"
+    description: "Loading modules with different toolchain versions"
+    patterns:
+      - problem: "Loading modules that are built with different toolchain versions and are incompatible with each other."
+        detector: "module load.*GCC"
+        exclude_pattern: ""
+        ai_recommendation: "You are trying to load modules with different toolchains simultaneously. This can lead to unpredictable errors during compilation and execution. Please choose one toolchain for your task and load only the modules corresponding to it."
+        additional_check: "multiple_gcc_versions"
+
+  - name: "Hardcoded Paths"
+    description: "Hardcoded paths in home or scratch directories"
+    patterns:
+      - problem: "export PATH=/home/user/my_software/bin:$PATH. This software might be built with old libraries or simply be suboptimal."
+        detector: "export.*PATH.*(/home|/scratch)"
+        exclude_pattern: ""
+        ai_recommendation: "You are adding a program installed in your home directory to PATH. If a system module exists for this program (module avail my_software), we recommend using it. System modules are built with the correct libraries and optimized for the cluster."
