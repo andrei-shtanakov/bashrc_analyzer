@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 from src.bashrc_analyzer.pattern_config import PatternConfig, Pattern
+from src.bashrc_analyzer.ai_service import AIService, LLMProvider
 
 
 def analyze_bashrc_file(file_path: Path, pattern_config: PatternConfig) -> List[Tuple[int, str, str, Pattern]]:
@@ -61,15 +62,86 @@ def print_analysis_report(file_path: Path, issues: List[Tuple[int, str, str, Pat
         print()
 
 
+def print_ai_enhanced_report(file_path: Path, issues: List[Tuple[int, str, str, Pattern]], 
+                           ai_service: AIService, provider: LLMProvider):
+    """Print an AI-enhanced analysis report."""
+    print(f"🔍 Analyzing: {file_path}")
+    print(f"🤖 AI Assistant: {provider.value.title()}")
+    print("=" * 60)
+    
+    if not issues:
+        print("✅ No issues found! Your .bashrc looks good.")
+        return
+    
+    print(f"⚠️  Found {len(issues)} potential issue(s):\n")
+    
+    for line_num, line, category_name, pattern in issues:
+        print(f"📍 Line {line_num}: {line}")
+        print(f"   Category: {category_name}")
+        
+        # Get AI explanation
+        ai_explanation = ai_service.get_ai_explanation(provider, pattern.problem, line, category_name)
+        if ai_explanation:
+            print(f"   🤖 AI Explanation:")
+            for explanation_line in ai_explanation.split('\n'):
+                if explanation_line.strip():
+                    print(f"      {explanation_line.strip()}")
+        else:
+            print(f"   💡 Basic Recommendation: {pattern.ai_recommendation}")
+        print()
+
+
+def save_annotated_bashrc(file_path: Path, issues: List[Tuple[int, str, str, Pattern]], 
+                         ai_service: AIService, provider: LLMProvider):
+    """Save an annotated version of the bashrc file."""
+    annotated_content = ai_service.generate_annotated_bashrc(str(file_path), issues, provider)
+    if annotated_content:
+        output_path = file_path.parent / f"{file_path.name}.annotated"
+        try:
+            with open(output_path, 'w', encoding='utf-8') as f:
+                f.write(annotated_content)
+            print(f"💾 Annotated version saved to: {output_path}")
+        except Exception as e:
+            print(f"❌ Failed to save annotated file: {e}")
+    else:
+        print("❌ Failed to generate annotated version")
+
+
+def prompt_for_output_format() -> str:
+    """Prompt user for output format preference."""
+    print("\n📄 Choose output format:")
+    print("  1. Terminal report only")
+    print("  2. Save annotated .bashrc file with AI comments")
+    print("  3. Both terminal report and annotated file")
+    
+    while True:
+        try:
+            choice = input("Enter your choice (1-3): ").strip()
+            if choice in ['1', '2', '3']:
+                return choice
+            else:
+                print("Please enter 1, 2, or 3")
+        except ValueError:
+            print("Please enter a valid number")
+        except KeyboardInterrupt:
+            print("\nOperation cancelled by user")
+            sys.exit(0)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Smart Linter for .bashrc files - detects common problems and anti-patterns",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                    # Analyze ~/.bashrc
+  %(prog)s                    # Analyze ~/.bashrc with AI assistance
   %(prog)s /path/to/.bashrc   # Analyze specific file
+  %(prog)s --no-ai            # Skip AI analysis (basic mode)
   %(prog)s --help             # Show this help
+
+Environment Variables:
+  ANTHROPIC_API_KEY           # For Claude AI assistance
+  OPENAI_API_KEY              # For ChatGPT AI assistance
         """
     )
     
@@ -80,9 +152,15 @@ Examples:
     )
     
     parser.add_argument(
+        '--no-ai',
+        action='store_true',
+        help='Skip AI analysis and use basic recommendations only'
+    )
+    
+    parser.add_argument(
         '--version',
         action='version',
-        version='%(prog)s 0.1.0'
+        version='%(prog)s 0.2.0'
     )
     
     args = parser.parse_args()
@@ -100,8 +178,27 @@ Examples:
         # Analyze the file
         issues = analyze_bashrc_file(bashrc_path, pattern_config)
         
-        # Print report
-        print_analysis_report(bashrc_path, issues)
+        # Initialize AI service
+        ai_service = AIService()
+        
+        if args.no_ai or not issues:
+            # Basic report without AI
+            print_analysis_report(bashrc_path, issues)
+        else:
+            # AI-enhanced analysis
+            provider = ai_service.prompt_for_provider_choice()
+            
+            if provider == LLMProvider.NONE:
+                print_analysis_report(bashrc_path, issues)
+            else:
+                # Get output format preference
+                output_format = prompt_for_output_format()
+                
+                if output_format in ['1', '3']:
+                    print_ai_enhanced_report(bashrc_path, issues, ai_service, provider)
+                
+                if output_format in ['2', '3']:
+                    save_annotated_bashrc(bashrc_path, issues, ai_service, provider)
         
         # Exit with error code if issues found (useful for CI/CD)
         sys.exit(1 if issues else 0)

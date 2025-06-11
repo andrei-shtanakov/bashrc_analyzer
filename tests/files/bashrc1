@@ -1,0 +1,67 @@
+# setup system environment
+if [ -r /etc/bashrc ]; then
+   source /etc/bashrc
+fi
+ 
+# setup umask
+umask 022
+export RELEASE=`cat /etc/redhat-release`
+ 
+# setup individual user environment
+export PATH=$PATH:/home/dittrbi1/bin
+ 
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
+ 
+#Load module at specific start - warning case sensitive
+#source /db/CADD/caddSetup/modulerc-bash
+ 
+module use /cm/local/modulefiles
+module use /usr/prog/modules/all
+module use /cm/shared/modulefiles
+module use /programs/share/modulefiles/x86_64-linux
+module use /usr/prog/sb/modules
+module load sbSetup
+ 
+module use /usr/prog/cadd/modules/
+module load uge
+#module load PyMOL
+#module load cresset
+#module load icm
+#module load icm-chemist
+#module load OpenBabel
+#module load corina
+#module load ccdc
+#module load MOE
+#module load MoKa
+ 
+#module load OpenEye
+#module load pymol/2.2.3.0
+#module load Schrodinger
+#module unload Python
+#module load anaconda/2.7-cadd-2019.2  # this causes login problems!!!
+#module load cosmologic/7.4
+#module load xtb
+#module load rescoss
+#module load Turbomole
+source /db/ccdc/init_2024.sh
+module load GCC/11.2.0
+ 
+ulimit -S -s unlimited
+export OMP_STACKSIZE=3200m
+export OMP_NUM_THREADS=12
+export MKL_NUM_THREADS=12
+export OMP_STACKSIZE=1000m
+export LD_LIBRARY_PATH=/usr/local/lib64/:$LD_LIBRARY_PATH
+#
+#################################################################################
+export HISTSIZE=5000
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ls='ls --color=tty'
+alias cp='cp -p'
+alias ll='ls -lart'
+export HTTP_PROXY=eu-chbs-proxy.eu.novartis.net:2011
+export HTTPS_PROXY=eu-chbs-proxy.eu.novartis.net:2010
+#alias /usr/prog/sb/witnotp/201601/bin/witnotp

@@ -1,0 +1,88 @@
+# .bashrc
+ 
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+   . /etc/bashrc
+fi
+ 
+# enable modules (this should replace ~/.modulerc method)
+if test -d /usr/prog/modules/all; then
+    module use /usr/prog/modules/all
+    module load proxy/GLOBAL
+fi
+if test -d /cm/shared/modulefiles; then
+    module use /cm/shared/modulefiles
+fi
+if test -d /cm/local/modulefiles; then
+    module use /cm/local/modulefiles
+fi
+# enable Novartis Structural Biology modules
+#if test -d /usr/prog/sb/modules; then
+#    module use /usr/prog/sb/modules
+#fi
+# enable XTB/RESCOSS modules
+if test -d /usr/prog/cadd/modules; then
+    module use /usr/prog/cadd/modules
+fi
+# checking which storage tier my data is in:
+#find /path/toFiles/ -type f > files.txt
+#cat files.txt|xargs -l1 -I {}|/usr/prog/scicomp/check_tier/check_tier.sh "{}"
+ 
+# modules for SBGrid
+module use /programs/share/modulefiles/x86_64-linux
+ 
+ 
+# User specific aliases and functions
+# set proxy if needed (for wget, etc)
+# export wget_proxy=http://usca-proxy01.na.novartis.net:2011
+alias cls='clear;ls'
+#alias gdcserver='adm_hornavi2@nrusca-sld0333.nibr.novartis.net'
+ 
+#PS1="[\h:\W]$ "
+#umask 022
+umask 027
+ 
+#export PATH=$PATH:/programs/x86_64-linux/grace/5.1.25/grace/bin
+export PATH=$PATH:/home/golosan1/bin
+export PYTHONPATH=~/bin:~/pythonmodules:~/local/lib/python3.6/site-packages:$PYTHONPATH
+ 
+ 
+# set Gaussian scratch directory
+#export GAUSS_SCRDIR=/clscratch/hornavi2
+ 
+# source Structural Biology Grid (SBG) software environment
+# something there overwrites my python module - that's a big no/go
+#source /usr/prog/sbgrid/sbgrid.shrc
+ 
+# load the modules you want
+module load uge
+#module load OpenEye/20190305
+#module load MOE/2019.0101
+module load MOE/2022.02_site
+# PyMOL 2.1.0.0 is matching VR PyMOL
+#module load PyMOL/2.3.1
+#module load sbgrid/pymol_schrodinger/2.3.1
+#module load icm/3.87b
+#module load icm-chemist/3.87b
+#module load cosmologic
+#module load Gaussian/09-foss-2018a
+module load ccdc/2019.2
+#module load VMD/1.9.3-cuda80
+module load MoKa/2.6.6
+#module load oraclient
+ 
+# Amber16
+# module load Amber
+ 
+export PYTHONPATH=/usr/prog/amber/amber16-goolf-1.5.14-NX/lib/python2.7/site-packages:$PYTHONPATH
+ 
+module load Amber/16-intel-2018a-AmberTools17-patchlevel-8.12-CUDA90
+ 
+#module load Rosetta/3.10-foss-2018a
+# this module has rdkit and also works with OEChem
+#module load anaconda/3.6-cadd-2019.2
+# the new 'joint' module:
+#module load PythonDS
+ 
+# there's a module for setting proxies:
+# module load NIBR/proxies/USCA

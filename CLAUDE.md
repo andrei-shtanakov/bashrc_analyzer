@@ -130,19 +130,20 @@ More user-friendly, but requires more infrastructure.
 
 ### Recommended Implementation Plan
 
-1. **MVP (Minimum Viable Product):** Create a **terminal tool (Option A)**, but **without AI**. Implement 3-5 most important rules (PATH overwrite, `conda activate`, `module load` in `.bashrc`). Output — simple formatted text. This will already provide 80% of the benefit.
+1. **MVP (Minimum Viable Product):** Create a **terminal tool (Option A)**, but **without AI**. Implement 3-5 most important rules (PATH overwrite, `conda activate`, `module load` in `.bashrc`). Output — simple formatted text. This will already provide 80% of the benefit. The running script without parameter checks user's `($HOME)/.bashrc`. The script can have one parameter - path to some other `.bashrc` file (the file name included and can be different with `.bashrc`).
 2. **Phase 2 (AI Integration):** Connect LLM to the terminal tool for generating explanations. This will make the tool much more user-friendly.
 3. **Phase 3 (Expansion):** Add more rules, create a knowledge base about module compatibility.
 4. **Phase 4 (GUI):** If there's demand from users, create a **web interface (Option B)** that will use the already debugged backend analyzer.
 
 This approach will allow you to quickly get a working prototype and gradually build up its functionality, making life for scientists on the cluster easier and safer.
 
+## Step 1 is done.
+## Now make Step 2. Connect to Generative Model for generating explanations. This will make the tool much more user-friendly. 
 
-## Now make only Step 1. Implement possibility to configure bad patterns in external file with next format:
-**Category X: Mane of Category**
-* **Problem:** Description of the problem.
-* **Detector:** Looks for `Wrong pattern`.
-* **AI Recommendation:** "The explanation of this problem".
-Format of this file should be YAML format.
+**A few tips:**
+* Use the API keys for Claude and Chat-GPT.
+* Pass API keys to the program via environment variables.
+* After displaying the results of Step 1, ask the user in the terminal which LLM to use and then transfer the file `.bashrc` and the results of the preliminary analysis.
+* Also, the result can be output in two versions, either just recommendations and LLM, or output.bashrc file with highlighting of problematic lines and comments under them.
 
-Before start to write code, make the structure of directories for this project. This project uses Python and uv.
+
