@@ -61,9 +61,9 @@ python test_basic.py
 ```
 = Analyzing: ~/.bashrc
 ============================================================
-Â   Found 3 potential issue(s):
+   Found 3 potential issue(s):
 
-=Ã Line 15: export PATH=/usr/local/bin
+=Í Line 15: export PATH=/usr/local/bin
    Category: Direct Path Management
    > AI Explanation:
       You're completely replacing the PATH variable instead of adding to it.
