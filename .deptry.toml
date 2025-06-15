@@ -1,0 +1,3 @@
+[tool.deptry]
+ignore = ["DEP001"]
+src_directories = ["src"]
