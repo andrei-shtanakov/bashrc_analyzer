@@ -138,7 +138,6 @@ More user-friendly, but requires more infrastructure.
 This approach will allow you to quickly get a working prototype and gradually build up its functionality, making life for scientists on the cluster easier and safer.
 
 ## Step 1 is done.
-## Now make Step 2. Connect to Generative Model for generating explanations. This will make the tool much more user-friendly. 
 
 **A few tips:**
 * Use the API keys for Claude and Chat-GPT.
@@ -146,4 +145,13 @@ This approach will allow you to quickly get a working prototype and gradually bu
 * After displaying the results of Step 1, ask the user in the terminal which LLM to use and then transfer the file `.bashrc` and the results of the preliminary analysis.
 * Also, the result can be output in two versions, either just recommendations and LLM, or output.bashrc file with highlighting of problematic lines and comments under them.
 
+## Done
 
+Currently, each potentially problematic line is passed separately with a description of the possible problem for analysis.
+Make it so that all potentially problematic lines are passed for analysis to AI with the line number and problem description simultaneously in one request and with the transfer of the '.bashrc' file itself.
+
+## Done
+
+## Now you have to make next.
+
+In the create_promp function (file src/bashrc_analyzer/ai_service.py), instead of the entry "You are a friendly AI assistant helping scientists and researchers using high-performance computing (HPC) clusters. Your job is to explain .bashrc configuration issues in simple and understandable terms" add the text from the file config/prompt.txt. This is necessary to be able to change the prompt separately.

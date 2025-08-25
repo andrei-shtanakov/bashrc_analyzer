@@ -64,7 +64,7 @@ def print_analysis_report(file_path: Path, issues: List[Tuple[int, str, str, Pat
 
 def print_ai_enhanced_report(file_path: Path, issues: List[Tuple[int, str, str, Pattern]], 
                            ai_service: AIService, provider: LLMProvider):
-    """Print an AI-enhanced analysis report."""
+    """Print an AI-enhanced analysis report using batch analysis."""
     print(f"🔍 Analyzing: {file_path}")
     print(f"🤖 AI Assistant: {provider.value.title()}")
     print("=" * 60)
@@ -73,28 +73,46 @@ def print_ai_enhanced_report(file_path: Path, issues: List[Tuple[int, str, str, 
         print("✅ No issues found! Your .bashrc looks good.")
         return
     
-    print(f"⚠️  Found {len(issues)} potential issue(s):\n")
+    print(f"⚠️  Found {len(issues)} potential issue(s)")
+    print("🤖 Getting comprehensive AI analysis...\n")
     
-    for line_num, line, category_name, pattern in issues:
-        print(f"📍 Line {line_num}: {line}")
-        print(f"   Category: {category_name}")
-        
-        # Get AI explanation
-        ai_explanation = ai_service.get_ai_explanation(provider, pattern.problem, line, category_name)
-        if ai_explanation:
-            print(f"   🤖 AI Explanation:")
-            for explanation_line in ai_explanation.split('\n'):
-                if explanation_line.strip():
-                    print(f"      {explanation_line.strip()}")
-        else:
+    # Read the full bashrc content for batch analysis
+    try:
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            bashrc_content = f.read()
+    except Exception:
+        bashrc_content = ""
+    
+    # Get batch AI analysis
+    batch_analysis = ai_service.get_batch_ai_analysis(provider, bashrc_content, issues)
+    
+    if batch_analysis:
+        print(batch_analysis)
+    else:
+        print("⚠️  AI analysis failed, falling back to basic recommendations:\n")
+        for line_num, line, category_name, pattern in issues:
+            print(f"📍 Line {line_num}: {line}")
+            print(f"   Category: {category_name}")
             print(f"   💡 Basic Recommendation: {pattern.ai_recommendation}")
-        print()
+            print()
 
 
 def save_annotated_bashrc(file_path: Path, issues: List[Tuple[int, str, str, Pattern]], 
                          ai_service: AIService, provider: LLMProvider):
-    """Save an annotated version of the bashrc file."""
-    annotated_content = ai_service.generate_annotated_bashrc(str(file_path), issues, provider)
+    """Save an annotated version of the bashrc file using batch analysis."""
+    # Read the full bashrc content for batch analysis
+    try:
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            bashrc_content = f.read()
+    except Exception:
+        bashrc_content = ""
+    
+    # Get batch AI analysis
+    batch_analysis = ai_service.get_batch_ai_analysis(provider, bashrc_content, issues)
+    
+    # Generate annotated content with batch analysis
+    annotated_content = ai_service.generate_annotated_bashrc(str(file_path), issues, provider, batch_analysis)
+    
     if annotated_content:
         output_path = file_path.parent / f"{file_path.name}.annotated"
         try:
